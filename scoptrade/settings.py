@@ -269,17 +269,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:8001",
     "http://127.0.0.1:3001",
-    "https://scopstrade.vercel.app",
-    "https://scopstrade.netlify.com",
-    "https://scoptrades.netlify.app",
-    "https://scopstrade-fe.onrender.com",
-    "https://scopstrade.com",
-    "https://www.scopstrade.com",
-    "https://scoptrade-backend.vercel.app",
-    "https://scoptrade.vercel.app",
-    "https://scopstrade-backend.vercel.app",
+    "http://111.90.143.29",
+    "https://www.scopstrades.com",
 ]
 
 _render_url = config('RENDER_EXTERNAL_URL', default='')
@@ -351,20 +343,12 @@ SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_NAME = 'csrftoken'
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
+    "http://localhost:3000",
     "http://localhost:3001",
+    "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
-    'http://localhost:8000',
-    'http://localhost:8001',
-    'http://127.0.0.1:8000',
-    'http://127.0.0.1:8001',
-    'https://scopstrade.vercel.app',
-    'https://scopstrade.com',
-    "https://www.scopstrade.com",
-    'https://scoptrade-backend.vercel.app',
-    "https://scoptrade.vercel.app",
-    "https://scopstrade-backend.vercel.app",
+    "http://111.90.143.29",
+    "https://www.scopstrades.com",
 ]
 
 if _render_url and _render_url not in CSRF_TRUSTED_ORIGINS:
