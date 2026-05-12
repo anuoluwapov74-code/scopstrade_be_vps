@@ -49,6 +49,7 @@ ADMIN_NOTIFICATION_EMAIL = config('ADMIN_NOTIFICATION_EMAIL', default='support@s
 
 
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
+RESEND_API_KEY = config('RESEND_API_KEY', default='')
 
 
 # ----------------------------
