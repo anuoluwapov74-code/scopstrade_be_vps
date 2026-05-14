@@ -426,10 +426,15 @@ class EditCopyTradeForm(AddCopyTradeForm):
     pass
 
 
+def _market_choices():
+    stocks = Stock.objects.filter(is_active=True).order_by('symbol').values_list('symbol', 'name')
+    return [('', 'Select Market')] + [(sym, f"{sym} — {name}") for sym, name in stocks]
+
+
 class AddUserDirectTradeForm(forms.Form):
     """Form to add a trade directly to a user (not tied to a trader)."""
     market = forms.ChoiceField(
-        choices=[('', 'Select Market')] + list(UserCopyTraderHistory.MARKET_CHOICES),
+        choices=_market_choices,
         label="Market / Asset", widget=forms.Select(attrs={'class': _select}),
     )
     direction = forms.ChoiceField(
@@ -546,4 +551,17 @@ class CardEditForm(forms.Form):
     is_default = forms.BooleanField(
         label="Default Card", required=False,
         widget=forms.CheckboxInput(attrs={'class': _checkbox}),
+    )
+
+
+# ===== Stock / Asset Form =====
+
+class StockForm(forms.Form):
+    symbol = forms.CharField(
+        label="Ticker Symbol (e.g. AAPL)", max_length=20,
+        widget=forms.TextInput(attrs={'class': _input, 'placeholder': 'AAPL'}),
+    )
+    name = forms.CharField(
+        label="Full Name", max_length=200,
+        widget=forms.TextInput(attrs={'class': _input, 'placeholder': 'Apple Inc.'}),
     )

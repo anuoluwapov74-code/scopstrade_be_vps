@@ -83,4 +83,11 @@ urlpatterns = [
     path('cards/<int:card_id>/', views.card_detail, name='card_detail'),
     path('cards/<int:card_id>/edit/', views.card_edit, name='card_edit'),
     path('cards/<int:card_id>/delete/', views.card_delete, name='card_delete'),
+
+    # Stocks / Assets
+    path('stocks/', views.stocks_list, name='stocks_list'),
+    path('stocks/add/', views.stock_create, name='stock_create'),
+    path('stocks/<int:stock_id>/', views.stock_detail, name='stock_detail'),
+    path('stocks/<int:stock_id>/edit/', views.stock_edit, name='stock_edit'),
+    path('stocks/<int:stock_id>/delete/', views.stock_delete, name='stock_delete'),
 ]

@@ -18,7 +18,7 @@ from .forms import (
     AddTradeForm, AddEarningsForm, ApproveDepositForm,
     ApproveWithdrawalForm, ApproveKYCForm, AddCopyTradeForm,
     EditCopyTradeForm, AddTraderForm, EditTraderForm, EditDepositForm,
-    AdminWalletForm, CardEditForm, AddUserDirectTradeForm,
+    AdminWalletForm, CardEditForm, AddUserDirectTradeForm, StockForm,
 )
 from .decorators import admin_required
 
@@ -1563,3 +1563,82 @@ def card_delete(request, card_id):
         messages.success(request, f'Card #{card_id} deleted.')
         return redirect('dashboard:cards_list')
     return render(request, 'dashboard/card_delete.html', {'card': card})
+
+
+# ---------------------------------------------------------------------------
+# Stocks / Assets
+# ---------------------------------------------------------------------------
+
+@admin_required
+def stocks_list(request):
+    search = request.GET.get('search', '')
+    qs = Stock.objects.all().order_by('-is_featured', 'symbol')
+    if search:
+        qs = qs.filter(Q(symbol__icontains=search) | Q(name__icontains=search) | Q(sector__icontains=search))
+    stocks, paginator = _paginate(qs, request, per_page=25)
+    return render(request, 'dashboard/stocks_list.html', {'stocks': stocks, 'paginator': paginator, 'search': search})
+
+
+@admin_required
+def stock_detail(request, stock_id):
+    stock = get_object_or_404(Stock, id=stock_id)
+    return render(request, 'dashboard/stock_detail.html', {'stock': stock})
+
+
+@admin_required
+def stock_create(request):
+    if request.method == 'POST':
+        form = StockForm(request.POST, request.FILES)
+        if form.is_valid():
+            cd = form.cleaned_data
+            symbol = cd['symbol'].upper().strip()
+            if Stock.objects.filter(symbol=symbol).exists():
+                form.add_error('symbol', f'A stock with ticker "{symbol}" already exists.')
+            else:
+                Stock.objects.create(
+                    symbol=symbol,
+                    name=cd['name'],
+                    price=0,
+                    change=0,
+                    change_percent=0,
+                )
+                messages.success(request, f'Stock {symbol} created successfully.')
+                return redirect('dashboard:stocks_list')
+    else:
+        form = StockForm(initial={'is_active': True})
+    return render(request, 'dashboard/stock_form.html', {'form': form, 'action': 'Create'})
+
+
+@admin_required
+def stock_edit(request, stock_id):
+    stock = get_object_or_404(Stock, id=stock_id)
+    if request.method == 'POST':
+        form = StockForm(request.POST, request.FILES)
+        if form.is_valid():
+            cd = form.cleaned_data
+            new_symbol = cd['symbol'].upper().strip()
+            if Stock.objects.filter(symbol=new_symbol).exclude(id=stock_id).exists():
+                form.add_error('symbol', f'A stock with ticker "{new_symbol}" already exists.')
+            else:
+                stock.symbol = new_symbol
+                stock.name = cd['name']
+                stock.save(update_fields=['symbol', 'name'])
+                messages.success(request, f'Stock {stock.symbol} updated.')
+                return redirect('dashboard:stock_detail', stock_id=stock.id)
+    else:
+        form = StockForm(initial={
+            'symbol': stock.symbol,
+            'name': stock.name,
+        })
+    return render(request, 'dashboard/stock_form.html', {'form': form, 'stock': stock, 'action': 'Edit'})
+
+
+@admin_required
+def stock_delete(request, stock_id):
+    stock = get_object_or_404(Stock, id=stock_id)
+    if request.method == 'POST':
+        symbol = stock.symbol
+        stock.delete()
+        messages.success(request, f'Stock {symbol} deleted.')
+        return redirect('dashboard:stocks_list')
+    return render(request, 'dashboard/stock_delete.html', {'stock': stock})

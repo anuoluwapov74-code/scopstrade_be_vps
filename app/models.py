@@ -1527,9 +1527,10 @@ class Stock(models.Model):
         ("DOCU", "DocuSign Inc. (DOCU)"),
     ]
     
-    symbol = models.CharField(max_length=10, choices=SYMBOL_CHOICES, unique=True)
+    symbol = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=200)
     logo_url = models.URLField(max_length=500, blank=True, null=True)
+    image = CloudinaryField("image", folder="stock_images", blank=True, null=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     change = models.DecimalField(max_digits=12, decimal_places=2)
     change_percent = models.DecimalField(max_digits=8, decimal_places=2)
