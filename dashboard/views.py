@@ -720,22 +720,94 @@ def delete_copy_trade(request, trade_id):
 
 @admin_required
 def traders_list(request):
-    search = request.GET.get('search', '')
-    badge_filter = request.GET.get('badge', '')
-    active_filter = request.GET.get('active', '')
-    qs = Trader.objects.all().order_by('-gain', '-copiers')
-    if search:
-        qs = qs.filter(Q(name__icontains=search) | Q(username__icontains=search) | Q(country__icontains=search))
-    if badge_filter:
-        qs = qs.filter(badge=badge_filter)
-    if active_filter:
-        qs = qs.filter(is_active=(active_filter == 'active'))
-    page_obj, paginator = _paginate(qs, request, 20)
-    return render(request, 'dashboard/traders_list.html', {
-        'traders': page_obj, 'page_obj': page_obj, 'paginator': paginator,
-        'is_paginated': paginator.num_pages > 1,
-        'search': search, 'badge_filter': badge_filter, 'active_filter': active_filter,
-    })
+    traders = Trader.objects.all().order_by('-gain', '-copiers')
+    return render(request, 'dashboard/traders_list.html', {'traders': traders})
+
+
+@admin_required
+def bulk_update_trader_stats(request):
+    if request.method != 'POST':
+        return redirect('dashboard:traders_list')
+
+    trader_ids = request.POST.getlist('trader_ids')
+    if not trader_ids:
+        messages.error(request, 'No traders selected.')
+        return redirect('dashboard:traders_list')
+
+    def get_pct(key):
+        try:
+            v = Decimal(request.POST.get(key, '0') or '0')
+            return v if v > 0 else Decimal('0')
+        except Exception:
+            return Decimal('0')
+
+    gain_pct        = get_pct('gain_pct')
+    return_ytd_pct  = get_pct('return_ytd_pct')
+    return_2y_pct   = get_pct('return_2y_pct')
+    win_rate_pct    = get_pct('win_rate_pct')
+    trades_pct      = get_pct('trades_pct')
+    copiers_pct     = get_pct('copiers_pct')
+    profit_share_pct = get_pct('profit_share_pct')
+    followers_pct   = get_pct('followers_pct')
+    min_capital_pct = get_pct('min_capital_pct')
+
+    traders = list(Trader.objects.filter(id__in=trader_ids))
+    fields_to_update = []
+
+    for trader in traders:
+        if gain_pct:
+            trader.gain = (trader.gain or Decimal('0')) * (1 + gain_pct / 100)
+        if return_ytd_pct:
+            trader.return_ytd = (trader.return_ytd or Decimal('0')) * (1 + return_ytd_pct / 100)
+        if return_2y_pct:
+            trader.return_2y = (trader.return_2y or Decimal('0')) * (1 + return_2y_pct / 100)
+        if win_rate_pct:
+            total_t = (trader.total_wins or 0) + (trader.total_losses or 0)
+            if total_t > 0:
+                current = (trader.total_wins or 0) / total_t
+                new_rate = min(current * float(1 + win_rate_pct / 100), 0.9999)
+                trader.total_wins = round(new_rate * total_t)
+                trader.total_losses = total_t - trader.total_wins
+        if trades_pct:
+            trader.trades = round((trader.trades or 0) * float(1 + trades_pct / 100))
+        if copiers_pct:
+            trader.copiers = round((trader.copiers or 0) * float(1 + copiers_pct / 100))
+        if profit_share_pct:
+            trader.profit_share = round((trader.profit_share or 0) * float(1 + profit_share_pct / 100))
+        if followers_pct:
+            trader.followers = round((trader.followers or 0) * float(1 + followers_pct / 100))
+        if min_capital_pct:
+            trader.min_account_threshold = (trader.min_account_threshold or Decimal('0')) * (1 + min_capital_pct / 100)
+
+    # Build the list of fields that were touched
+    if gain_pct:        fields_to_update.append('gain')
+    if return_ytd_pct:  fields_to_update.append('return_ytd')
+    if return_2y_pct:   fields_to_update.append('return_2y')
+    if win_rate_pct:    fields_to_update.extend(['total_wins', 'total_losses'])
+    if trades_pct:      fields_to_update.append('trades')
+    if copiers_pct:     fields_to_update.append('copiers')
+    if profit_share_pct: fields_to_update.append('profit_share')
+    if followers_pct:   fields_to_update.append('followers')
+    if min_capital_pct: fields_to_update.append('min_account_threshold')
+
+    if traders and fields_to_update:
+        try:
+            Trader.objects.bulk_update(traders, fields_to_update)
+        except Exception as e:
+            # Close the broken connection so the session middleware
+            # can reconnect and save the session (prevents logout).
+            from django.db import connection as _conn
+            try:
+                _conn.close()
+            except Exception:
+                pass
+            messages.error(request, f'Update failed: {e}')
+            return redirect('dashboard:traders_list')
+        messages.success(request, f'Stats updated for {len(traders)} trader(s).')
+    else:
+        messages.warning(request, 'No changes applied — all percentage fields were 0%.')
+
+    return redirect('dashboard:traders_list')
 
 
 def _build_trader_data(form):
