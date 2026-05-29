@@ -66,7 +66,14 @@
                 {% if trade.custom_image %}
                 <div class="mb-2 flex items-center gap-3">
                     <img src="{{ trade.custom_image.url }}" alt="Current image" class="w-12 h-12 rounded-lg object-cover border border-gray-200">
-                    <p class="text-xs text-gray-500">Current image — upload a new one to replace it</p>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Current image — upload a new one to replace it</p>
+                        <label class="inline-flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="clear_image" value="1"
+                                class="w-4 h-4 rounded text-red-500 border-gray-300">
+                            <span class="text-xs text-red-500 font-medium">Remove current image</span>
+                        </label>
+                    </div>
                 </div>
                 {% endif %}
                 {{ form.custom_image }}

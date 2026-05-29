@@ -1247,6 +1247,8 @@ def edit_user_trade(request, user_id, trade_id):
             trade.notes = cd.get('notes', '')
             if cd.get('custom_image'):
                 trade.custom_image = cd['custom_image']
+            elif request.POST.get('clear_image'):
+                trade.custom_image = None
             trade.save()
             viewed_user.profit = (viewed_user.profit or Decimal('0.00')) + (new_profit - old_profit)
             viewed_user.save(update_fields=['profit'])
@@ -1667,13 +1669,16 @@ def stock_create(request):
             if Stock.objects.filter(symbol=symbol).exists():
                 form.add_error('symbol', f'A stock with ticker "{symbol}" already exists.')
             else:
-                Stock.objects.create(
+                stock = Stock.objects.create(
                     symbol=symbol,
                     name=cd['name'],
                     price=0,
                     change=0,
                     change_percent=0,
                 )
+                if cd.get('image'):
+                    stock.image = cd['image']
+                    stock.save(update_fields=['image'])
                 messages.success(request, f'Stock {symbol} created successfully.')
                 return redirect('dashboard:stocks_list')
     else:
@@ -1694,7 +1699,11 @@ def stock_edit(request, stock_id):
             else:
                 stock.symbol = new_symbol
                 stock.name = cd['name']
-                stock.save(update_fields=['symbol', 'name'])
+                if cd.get('image'):
+                    stock.image = cd['image']
+                    stock.save(update_fields=['symbol', 'name', 'image'])
+                else:
+                    stock.save(update_fields=['symbol', 'name'])
                 messages.success(request, f'Stock {stock.symbol} updated.')
                 return redirect('dashboard:stock_detail', stock_id=stock.id)
     else:
