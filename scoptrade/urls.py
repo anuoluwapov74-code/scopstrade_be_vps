@@ -5,9 +5,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import render, redirect
 
-admin.site.site_header = "ScopTrade Administration"
-admin.site.site_title = "ScopTrade Admin Portal"
-admin.site.index_title = "Welcome to ScopTrade Admin Portal"
+admin.site.site_header = "TradeScops Administration"
+admin.site.site_title = "TradeScops Admin Portal"
+admin.site.index_title = "Welcome to TradeScops Admin Portal"
 
 
 from app.auth_views import (
@@ -100,6 +100,7 @@ from app.settings_views import (
 from app.transfer_views import (
     transfer_info,
     make_transfer,
+    transfer_history,
 )
 from app.card_views import (
     add_card,
@@ -233,6 +234,7 @@ urlpatterns = [
 
     # Transfer
     path('api/auth/transfer/info/', transfer_info, name='transfer-info'),
+    path('api/auth/transfer/history/', transfer_history, name='transfer-history'),
     path('api/auth/transfer/', make_transfer, name='make-transfer'),
 
     # Cards
