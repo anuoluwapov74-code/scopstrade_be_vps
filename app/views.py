@@ -11,8 +11,13 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 
+from decimal import Decimal
 from .models import AdminWallet, Transaction, PaymentMethod, Notification
-from .email_service import send_admin_payment_intent_notification
+from .email_service import (
+    send_admin_payment_intent_notification,
+    send_admin_withdrawal_intent_notification,
+    send_admin_withdrawal_notification,
+)
 
 
 # ============================================================
@@ -257,6 +262,46 @@ def get_withdrawal_methods(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+def withdrawal_intent(request):
+    """
+    Notify admin that a user is confirming a withdrawal. Fired by the frontend
+    right before the real withdrawal request; never creates a Transaction and
+    never touches the user's funds.
+    """
+    user = request.user
+    currency = request.data.get("method_type")
+    amount = request.data.get("amount")
+    address = request.data.get("withdrawal_address", "")
+    source = request.data.get("source", "balance")
+
+    if not currency or not amount:
+        return Response({
+            "success": False,
+            "error": "Method and amount are required.",
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        amount_val = Decimal(str(amount))
+        if amount_val <= 0:
+            raise ValueError
+    except (ArithmeticError, ValueError, TypeError):
+        return Response({
+            "success": False,
+            "error": "Please enter a valid amount.",
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    source_label = "Profit" if source == "profit" else "Main Balance"
+
+    send_admin_withdrawal_intent_notification(user, currency, amount_val, source_label, address)
+
+    return Response({
+        "success": True,
+        "message": "Withdrawal intent recorded.",
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_withdrawal(request):
     """
     Create a new withdrawal transaction.
@@ -334,6 +379,8 @@ def create_withdrawal(request):
             "address": withdrawal_address,
         },
     )
+
+    send_admin_withdrawal_notification(user, transaction, method_type=method_type, address=withdrawal_address)
 
     return Response({
         "success": True,
