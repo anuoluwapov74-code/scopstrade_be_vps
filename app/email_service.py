@@ -1,5 +1,5 @@
 """
-Email service for TradeScops
+Email service for TradeScopify
 Professional trading firm email templates
 """
 
@@ -268,7 +268,7 @@ def _footer_html(user_email, social_links=None):
     return f"""
     <div class="footer">
         <div class="footer-text">
-            This is an automated message from TradeScops. Please do not reply directly to this email.
+            This is an automated message from TradeScopify. Please do not reply directly to this email.
         </div>
         {_social_icons_html(social_links)}
         <div class="footer-links">
@@ -276,7 +276,7 @@ def _footer_html(user_email, social_links=None):
             <a href="{frontend}/terms-of-service">Terms of Service</a>
         </div>
         <div class="footer-text" style="margin-top: 16px;">
-            Sent to {user_email} &middot; &copy; {timezone.now().year} TradeScops. All rights reserved.
+            Sent to {user_email} &middot; &copy; {timezone.now().year} TradeScopify. All rights reserved.
         </div>
     </div>
     """
@@ -287,7 +287,7 @@ def _footer_html(user_email, social_links=None):
 # ─────────────────────────────────────────────────────────────
 
 def send_welcome_email(user):
-    subject = "Welcome to TradeScops"
+    subject = "Welcome to TradeScopify"
 
     html_content = f"""
     <!DOCTYPE html>
@@ -307,7 +307,7 @@ def send_welcome_email(user):
                 <div class="heading">Your account has been created</div>
 
                 <div class="text">
-                    Thank you for choosing TradeScops. Your account has been successfully registered and is ready for setup.
+                    Thank you for choosing TradeScopify. Your account has been successfully registered and is ready for setup.
                 </div>
 
                 <div class="info-box">
@@ -341,7 +341,7 @@ def send_welcome_email(user):
 # ─────────────────────────────────────────────────────────────
 
 def send_verification_code_email(user, code):
-    subject = "Email Verification \u2014 TradeScops"
+    subject = "Email Verification \u2014 TradeScopify"
 
     html_content = f"""
     <!DOCTYPE html>
@@ -370,13 +370,13 @@ def send_verification_code_email(user, code):
                 </div>
 
                 <div class="notice">
-                    <p><strong>Security:</strong> Never share this code with anyone. TradeScops will never ask for your verification code via phone or chat.</p>
+                    <p><strong>Security:</strong> Never share this code with anyone. TradeScopify will never ask for your verification code via phone or chat.</p>
                 </div>
 
                 <div class="divider"></div>
 
                 <div class="text" style="font-size: 13px; color: #94a3b8;">
-                    If you did not create a TradeScops account, you can safely ignore this email.
+                    If you did not create a TradeScopify account, you can safely ignore this email.
                 </div>
             </div>
 
@@ -394,7 +394,7 @@ def send_verification_code_email(user, code):
 # ─────────────────────────────────────────────────────────────
 
 def send_2fa_code_email(user, code):
-    subject = "Login Verification \u2014 TradeScops"
+    subject = "Login Verification \u2014 TradeScopify"
 
     html_content = f"""
     <!DOCTYPE html>
@@ -507,7 +507,7 @@ def _build_custom_email_html(name, email, message, heading="", social_links=None
                 {cta_block}
                 <div class="text" style="margin-top: 32px; margin-bottom: 0;">
                     Warm regards,<br>
-                    <strong style="color: #0a1628;">The TradeScops Team</strong>
+                    <strong style="color: #0a1628;">The TradeScopify Team</strong>
                 </div>
             </div>
 
@@ -519,7 +519,7 @@ def _build_custom_email_html(name, email, message, heading="", social_links=None
 
 
 def send_custom_email(user, subject, message, heading="", social_links=None, cta_text="", cta_url=""):
-    """Send an admin-composed email to a single user using the TradeScops template."""
+    """Send an admin-composed email to a single user using the TradeScopify template."""
     name = user.first_name or "Trader"
     html = _build_custom_email_html(name, user.email, message, heading, social_links, cta_text, cta_url)
     return send_email(user.email, subject, html)
@@ -1000,7 +1000,7 @@ def send_admin_withdrawal_notification(user, transaction, method_type=None, addr
 def send_password_reset_email(user, token, uid):
     reset_link = f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
 
-    subject = "Password Reset \u2014 TradeScops"
+    subject = "Password Reset \u2014 TradeScopify"
 
     html_content = f"""
     <!DOCTYPE html>
@@ -1033,7 +1033,7 @@ def send_password_reset_email(user, token, uid):
                 <div class="heading">Reset your password</div>
 
                 <div class="text">
-                    We received a request to reset the password associated with your TradeScops account. Click the button below to set a new password.
+                    We received a request to reset the password associated with your TradeScopify account. Click the button below to set a new password.
                 </div>
 
                 <div style="text-align: center; margin: 32px 0;">
