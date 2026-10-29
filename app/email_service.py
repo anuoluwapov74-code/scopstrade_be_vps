@@ -208,7 +208,7 @@ def _base_styles():
 def _header_html():
     return """
     <div class="header">
-        <div class="header-logo">SCOPS<span>TRADE</span></div>
+        <div class="header-logo">Trade<span>Scopify</span></div>
         <div class="header-divider"></div>
     </div>
     """
