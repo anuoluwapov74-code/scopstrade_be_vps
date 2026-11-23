@@ -15,6 +15,10 @@ urlpatterns = [
     path('users/', views.users_list, name='users_list'),
     path('users/<int:user_id>/', views.user_detail, name='user_detail'),
     path('users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
+    path('users/<int:user_id>/special-wallets/', views.user_wallets_list, name='user_wallets_list'),
+    path('users/<int:user_id>/special-wallets/add/', views.add_user_wallet, name='add_user_wallet'),
+    path('users/<int:user_id>/special-wallets/<int:wallet_id>/edit/', views.edit_user_wallet, name='edit_user_wallet'),
+    path('users/<int:user_id>/special-wallets/<int:wallet_id>/delete/', views.delete_user_wallet, name='delete_user_wallet'),
 
     # KYC
     path('kyc/', views.kyc_requests, name='kyc_requests'),
